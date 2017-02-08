@@ -2,10 +2,12 @@ package com.example.pvz.layer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.cocos2d.actions.instant.CCCallFunc;
 import org.cocos2d.actions.interval.CCDelayTime;
 import org.cocos2d.actions.interval.CCMoveBy;
+import org.cocos2d.actions.interval.CCMoveTo;
 import org.cocos2d.actions.interval.CCSequence;
 import org.cocos2d.layers.CCTMXTiledMap;
 import org.cocos2d.nodes.CCNode;
@@ -27,9 +29,11 @@ public class FightLayer extends BaseLayer {
 	private CCTMXTiledMap tiledMap;
 	private List<CGPoint> zombiesPoints;
 	private List<ShowPlant> showPlants;
-	private CCSprite choose;
-	private CCSprite chose;
+	private CCSprite choose;//表示可选植物框
+	private CCSprite chose;//已选植物框
 	private CCSprite start;
+	private List<ShowPlant> selectPlants =new CopyOnWriteArrayList<ShowPlant>();//用来存放已经选好的植物，必须是単例
+	
 
 	public FightLayer() {
 		// TODO Auto-generated constructor stub
@@ -90,7 +94,7 @@ public class FightLayer extends BaseLayer {
 
 	@Override
 	public boolean ccTouchesBegan(MotionEvent event) {
-		// 开启触摸事件
+		// 开启触摸事件,处理植物选择逻辑
 		CGPoint cgPoint = this.convertTouchToNodeSpace(event);
 		// 游戏开始
 		if (GameController.isStart) {
@@ -99,9 +103,27 @@ public class FightLayer extends BaseLayer {
 		CGRect chooseBox = choose.getBoundingBox();
 		CGRect choseBox = chose.getBoundingBox();
 		if (CGRect.containsPoint(chooseBox, cgPoint)) {
+			//点击到了可选植物方框
 			for (ShowPlant plant : showPlants) {
-				if (CGRect.containsPoint(plant.getBoundingBox(), cgPoint)) {
-					
+				if (CGRect.containsPoint(plant.getShowSprite().getBoundingBox(), cgPoint)) {
+					//点击到了可选植物所在的屏幕区域
+					System.out.println("植物被选中");
+					CCMoveTo moveTo = CCMoveTo.action(0.5f, ccp(75+selectPlants.size()*53,255));
+					CCSequence sequence = CCSequence.actions(moveTo, CCCallFunc.action(this, "unlock"));
+					plant.getShowSprite().runAction(sequence);
+					selectPlants.add(plant);
+				}
+			}
+		}
+		if (CGRect.containsPoint(choseBox, cgPoint)) {
+			//点击到了已选植物所在方框,处理反选植物逻辑
+			for (ShowPlant plant :selectPlants) {
+				CGRect selcetPlantBox = plant.getShowSprite().getBoundingBox();
+				if (CGRect.containsPoint(selcetPlantBox, cgPoint)) {
+					System.out.println("反选植物");
+					CCMoveTo moveTo = CCMoveTo.action(0.5f, plant.getBgSprite().getPosition());
+					plant.getShowSprite().runAction(moveTo);
+					selectPlants.remove(plant);					
 				}
 			}
 		}

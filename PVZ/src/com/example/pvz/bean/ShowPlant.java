@@ -25,7 +25,7 @@ public class ShowPlant extends BaseLayer {
 
 	// 查询数据库 获取植物
 	static {
-		// 模拟了数据库
+		// 模拟数据库
 		db = new HashMap<Integer, HashMap<String, String>>();
 		String format = "image/fight/chose/choose_default%02d.png";
 		for (int i = 1; i <= 9; i++) {
