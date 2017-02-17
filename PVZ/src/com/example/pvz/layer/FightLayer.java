@@ -164,7 +164,10 @@ public class FightLayer extends BaseLayer {
 	}
 
 	private void ready() {
-		// TODO Auto-generated method stub
+		// 开始游戏
+//		1.首先缩小植物卡片栏
+//		2.移除选择植物的界面
+//		3.移动地图
 
 	}
 
