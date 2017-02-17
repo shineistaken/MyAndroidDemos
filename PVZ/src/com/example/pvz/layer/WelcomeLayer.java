@@ -1,21 +1,11 @@
 package com.example.pvz.layer;
 
-import java.util.ArrayList;
-
 import org.cocos2d.actions.base.CCAction;
 import org.cocos2d.actions.instant.CCCallFunc;
 import org.cocos2d.actions.instant.CCHide;
-import org.cocos2d.actions.interval.CCAnimate;
 import org.cocos2d.actions.interval.CCDelayTime;
 import org.cocos2d.actions.interval.CCSequence;
-import org.cocos2d.layers.CCScene;
-import org.cocos2d.nodes.CCAnimation;
-import org.cocos2d.nodes.CCDirector;
-import org.cocos2d.nodes.CCNode;
 import org.cocos2d.nodes.CCSprite;
-import org.cocos2d.nodes.CCSpriteFrame;
-import org.cocos2d.transitions.CCFadeTransition;
-import org.cocos2d.transitions.CCTransitionScene;
 import org.cocos2d.types.CGPoint;
 import org.cocos2d.types.CGRect;
 

@@ -5,8 +5,6 @@ import java.util.Map;
 
 import org.cocos2d.nodes.CCSprite;
 
-import android.R.integer;
-
 import com.example.pvz.layer.BaseLayer;
 
 public class ShowPlant extends BaseLayer {

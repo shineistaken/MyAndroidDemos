@@ -2,7 +2,6 @@ package com.example.pvz.layer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.cocos2d.actions.base.CCAction;
@@ -48,7 +47,30 @@ public class FightLayer extends BaseLayer {
 		showZombies();
 		moveMap();
 	}
+	private void loadMap() {
+		tiledMap = CCTMXTiledMap.tiledMap("image/fight/map_day.tmx");
+		tiledMap.setAnchorPoint(0.5f, 0.5f);
+		CGSize contentSize = tiledMap.getContentSize();
+		tiledMap.setPosition(contentSize.width / 2, contentSize.height / 2);
+		this.addChild(tiledMap);
 
+	}
+
+	private void parserMap() {
+		// 解析地图
+		zombiesPoints = CommonUtils.getMapPoints(tiledMap, "zombies");
+	}
+	
+	private void showZombies() {
+		// 展示僵尸
+		for (int i = 0; i < zombiesPoints.size(); i++) {
+			CGPoint cgPoint = zombiesPoints.get(i);
+			ShowZombies showZombies = new ShowZombies();
+			showZombies.setPosition(cgPoint);
+			tiledMap.addChild(showZombies);
+		}
+
+	}
 	private void moveMap() {
 		// TODO Auto-generated method stub
 		int x = -(int) Math
@@ -210,30 +232,8 @@ public class FightLayer extends BaseLayer {
 	}
 
 
-	private void showZombies() {
-		// 展示僵尸
-		for (int i = 0; i < zombiesPoints.size(); i++) {
-			CGPoint cgPoint = zombiesPoints.get(i);
-			ShowZombies showZombies = new ShowZombies();
-			showZombies.setPosition(cgPoint);
-			tiledMap.addChild(showZombies);
-		}
 
-	}
 
-	private void loadMap() {
-		tiledMap = CCTMXTiledMap.tiledMap("image/fight/map_day.tmx");
-		tiledMap.setAnchorPoint(0.5f, 0.5f);
-		CGSize contentSize = tiledMap.getContentSize();
-		tiledMap.setPosition(contentSize.width / 2, contentSize.height / 2);
-		this.addChild(tiledMap);
 
-	}
-
-	private void parserMap() {
-		// 解析地图
-		zombiesPoints = CommonUtils.getMapPoints(tiledMap, "zombies");
-	}
-	
 
 }

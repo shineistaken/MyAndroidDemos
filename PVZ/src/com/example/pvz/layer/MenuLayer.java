@@ -6,9 +6,6 @@ import org.cocos2d.nodes.CCSprite;
 
 import com.example.pvz.CommonUtils.CommonUtils;
 
-
-import android.util.Log;
-
 public class MenuLayer extends BaseLayer {
 	public MenuLayer() {
 		init();

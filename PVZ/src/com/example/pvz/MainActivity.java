@@ -2,15 +2,8 @@ package com.example.pvz;
 
 import org.cocos2d.layers.CCScene;
 import org.cocos2d.nodes.CCDirector;
-import org.cocos2d.nodes.CCSprite;
 import org.cocos2d.opengl.CCGLSurfaceView;
-import org.cocos2d.types.CGPoint;
-import org.cocos2d.types.CGSize;
-
-import com.example.pvz.layer.BaseLayer;
 import com.example.pvz.layer.FightLayer;
-import com.example.pvz.layer.WelcomeLayer;
-
 import android.app.Activity;
 import android.os.Bundle;
 

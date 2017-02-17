@@ -19,7 +19,6 @@ import org.cocos2d.nodes.CCSpriteFrame;
 import org.cocos2d.transitions.CCFadeTransition;
 import org.cocos2d.types.CGPoint;
 
-import android.R.integer;
 
 public class CommonUtils {
 	public static void changeLayer(CCLayer ccLayer) {
