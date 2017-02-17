@@ -1,23 +1,24 @@
 package com.example.pvz.layer;
 
-import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.cocos2d.actions.base.CCAction;
 import org.cocos2d.actions.instant.CCCallFunc;
+import org.cocos2d.actions.interval.CCAnimate;
 import org.cocos2d.actions.interval.CCDelayTime;
 import org.cocos2d.actions.interval.CCMoveBy;
 import org.cocos2d.actions.interval.CCMoveTo;
 import org.cocos2d.actions.interval.CCSequence;
 import org.cocos2d.layers.CCTMXTiledMap;
-import org.cocos2d.nodes.CCNode;
+import org.cocos2d.nodes.CCDirector;
 import org.cocos2d.nodes.CCSprite;
 import org.cocos2d.types.CGPoint;
 import org.cocos2d.types.CGRect;
 import org.cocos2d.types.CGSize;
 
-import android.graphics.Point;
 import android.view.MotionEvent;
 
 import com.example.pvz.CommonUtils.CommonUtils;
@@ -32,12 +33,13 @@ public class FightLayer extends BaseLayer {
 	private List<ShowPlant> showPlants;
 	private CCSprite choose;// 表示可选植物框
 	private CCSprite chose;// 已选植物框
-	private CCSprite start;
 	private List<ShowPlant> selectPlants = new CopyOnWriteArrayList<ShowPlant>();// 用来存放已经选好的植物，必须是単例
-	private boolean isDel;
-	private boolean isLock;
+	private boolean isDel = false;
+	private boolean isLock = false;
 	private CGRect selcetPlantBox;
 	private static final int availablePlantCount = 5;
+	private CCSprite startGame;
+	private CCSprite ready;
 
 	public FightLayer() {
 		// TODO Auto-generated constructor stub
@@ -70,9 +72,9 @@ public class FightLayer extends BaseLayer {
 		this.addChild(choose);
 
 		loadPlants();
-		start = CCSprite.sprite("image/fight/chose/fight_start.png");
-		start.setPosition(choose.getContentSize().width / 2, 30);
-		choose.addChild(start);
+		startGame = CCSprite.sprite("image/fight/chose/fight_start.png");
+		startGame.setPosition(choose.getContentSize().width / 2, 30);
+		choose.addChild(startGame);
 	}
 
 	private void loadPlants() {
@@ -110,54 +112,56 @@ public class FightLayer extends BaseLayer {
 		}
 		CGRect chooseBox = choose.getBoundingBox();
 		CGRect choseBox = chose.getBoundingBox();
+		CGRect startGameBox = startGame.getBoundingBox();
 
 		// 选择植物
-		if (!isLock) {
-			if (CGRect.containsPoint(chooseBox, cgPoint)
-					&& selectPlants.size() < availablePlantCount) {
+		if (CGRect.containsPoint(chooseBox, cgPoint)
+				&& selectPlants.size() < availablePlantCount && !isLock) {
 
-				for (ShowPlant plant : showPlants) {
-					if (CGRect.containsPoint(plant.getShowSprite()
-							.getBoundingBox(), cgPoint)) {
-						// 点击到了可选植物所在的屏幕区域
-						System.out.println("植物被选中");
-						isLock = true;
-						CCMoveTo moveTo = CCMoveTo.action(0.25f,
-								ccp(75 + selectPlants.size() * 53, 255));
-						CCSequence sequence = CCSequence.actions(moveTo,
-								CCCallFunc.action(this, "unlock"));
-						plant.getShowSprite().runAction(sequence);
-						selectPlants.add(plant);
-					}
+			for (ShowPlant plant : showPlants) {
+				if (CGRect.containsPoint(
+						plant.getShowSprite().getBoundingBox(), cgPoint)) {
+					// 点击到了可选植物所在的屏幕区域
+					System.out.println("植物被选中");
+					isLock = true;
+					CCMoveTo moveTo = CCMoveTo.action(0.25f,
+							ccp(75 + selectPlants.size() * 53, 255));
+					CCSequence sequence = CCSequence.actions(moveTo,
+							CCCallFunc.action(this, "unlock"));
+					plant.getShowSprite().runAction(sequence);
+					selectPlants.add(plant);
 				}
 			}
-
-			if (CGRect.containsPoint(choseBox, cgPoint)) {
-				isDel = false;
-				// 点击到了已选植物所在方框,处理反选植物逻辑
-				for (ShowPlant plant : selectPlants) {
-					selcetPlantBox = plant.getShowSprite().getBoundingBox();
-					if (CGRect.containsPoint(selcetPlantBox, cgPoint)) {
-						System.out.println("反选植物");
-						isLock = true;
-						CCMoveTo moveTo = CCMoveTo.action(0.25f, plant
-								.getBgSprite().getPosition());
-						plant.getShowSprite().runAction(moveTo);
-						selectPlants.remove(plant);
-						isDel = true;
-						continue;
-					}
-					if (isDel) {
-						CCMoveBy moveBy = CCMoveBy.action(0.1f, ccp(-53, 0));
-						plant.getShowSprite().runAction(moveBy);
-					}
+		} else if (CGRect.containsPoint(choseBox, cgPoint) && !isLock) {
+			isDel = false;
+			// 点击到了已选植物所在方框,处理反选植物逻辑
+			for (ShowPlant plant : selectPlants) {
+				selcetPlantBox = plant.getShowSprite().getBoundingBox();
+				if (CGRect.containsPoint(selcetPlantBox, cgPoint)) {
+					System.out.println("反选植物");
+					isLock = true;
+					CCMoveTo moveTo = CCMoveTo.action(0.25f, plant
+							.getBgSprite().getPosition());
+					plant.getShowSprite().runAction(moveTo);
+					selectPlants.remove(plant);
+					isDel = true;
+					continue;
 				}
-				unlock();
+				if (isDel) {
+					CCMoveBy moveBy = CCMoveBy.action(0.1f, ccp(-53, 0));
+					plant.getShowSprite().runAction(moveBy);
+				}
 			}
-
-		} else if (CGRect.containsPoint(start.getBoundingBox(), cgPoint)) {
+			unlock();
+		}
+		if (CGRect.containsPoint(startGameBox, cgPoint)) {
 			// 点击了一起摇滚
-			ready();
+			System.out.println("一起来摇滚");
+			if (selectPlants.isEmpty()) {
+				// 选了植物才能开始游戏
+			} else {
+				ready();
+			}
 		}
 
 		return super.ccTouchesBegan(event);
@@ -165,11 +169,46 @@ public class FightLayer extends BaseLayer {
 
 	private void ready() {
 		// 开始游戏
-//		1.首先缩小植物卡片栏
-//		2.移除选择植物的界面
-//		3.移动地图
+		// 1.首先缩小植物卡片槽
+		chose.setScale(0.65f);
+		for (ShowPlant plant : selectPlants) {
 
+			plant.getShowSprite().setScale(0.65f);// 因为父容器缩小了 子元素必须一起缩小
+
+			plant.getShowSprite().setPosition(
+					plant.getShowSprite().getPosition().x * 0.65f,
+					plant.getShowSprite().getPosition().y
+
+					+ (CCDirector.sharedDirector().getWinSize().height - plant
+
+					.getShowSprite().getPosition().y)
+					* 0.35f);// 重新计算坐标
+			this.addChild(plant.getShowSprite());
+		}
+		// 2.移除选择植物的界面
+		choose.removeSelf();
+		// 3.移动地图
+		int x =(int) (tiledMap.getContentSize().width-winSize.width);
+		CCMoveBy moveBy = CCMoveBy.action(1, ccp(x, 0));
+		CCSequence sequence = CCSequence.actions(CCDelayTime.action(1),moveBy, CCCallFunc.action(this, "preGame"));
+		tiledMap.runAction(sequence);
 	}
+	public void preGame() {
+		ready = CCSprite.sprite("image/fight/startready_01.png");
+		ready.setPosition(winSize.width/2, winSize.height/2);
+		this.addChild(ready);
+		String format="image/fight/startready_%02d.png";
+		CCAction animate = CommonUtils.getAnimate(format, 3, false);
+		CCSequence sequence=CCSequence.actions((CCAnimate)animate, CCCallFunc.action(this, "startGame"));
+		ready.runAction(sequence);
+	}
+	public void startGame() {
+		// 开始对战
+		ready.removeSelf();
+		GameController controller = GameController.getInstance();
+		controller.startGame(tiledMap,selectPlants);
+	}
+
 
 	private void showZombies() {
 		// 展示僵尸
@@ -195,5 +234,6 @@ public class FightLayer extends BaseLayer {
 		// 解析地图
 		zombiesPoints = CommonUtils.getMapPoints(tiledMap, "zombies");
 	}
+	
 
 }
