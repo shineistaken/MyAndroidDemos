@@ -8,6 +8,7 @@ import org.cocos2d.types.CGPoint;
 import org.cocos2d.types.CGSize;
 
 import com.example.pvz.layer.BaseLayer;
+import com.example.pvz.layer.FightLayer;
 import com.example.pvz.layer.WelcomeLayer;
 
 import android.app.Activity;
@@ -29,7 +30,8 @@ public class MainActivity extends Activity {
 		director.setScreenSize(480, 320);
 		
 		CCScene scene = CCScene.node();
-		scene.addChild(new WelcomeLayer());
+//		scene.addChild(new WelcomeLayer());
+		scene.addChild(new FightLayer());
 		director.runWithScene(scene);
 		
 

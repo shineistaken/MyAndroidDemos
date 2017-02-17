@@ -1,5 +1,6 @@
 package com.example.pvz.layer;
 
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -29,11 +30,14 @@ public class FightLayer extends BaseLayer {
 	private CCTMXTiledMap tiledMap;
 	private List<CGPoint> zombiesPoints;
 	private List<ShowPlant> showPlants;
-	private CCSprite choose;//表示可选植物框
-	private CCSprite chose;//已选植物框
+	private CCSprite choose;// 表示可选植物框
+	private CCSprite chose;// 已选植物框
 	private CCSprite start;
-	private List<ShowPlant> selectPlants =new CopyOnWriteArrayList<ShowPlant>();//用来存放已经选好的植物，必须是単例
-	
+	private List<ShowPlant> selectPlants = new CopyOnWriteArrayList<ShowPlant>();// 用来存放已经选好的植物，必须是単例
+	private boolean isDel;
+	private boolean isLock;
+	private CGRect selcetPlantBox;
+	private static final int availablePlantCount = 5;
 
 	public FightLayer() {
 		// TODO Auto-generated constructor stub
@@ -92,6 +96,10 @@ public class FightLayer extends BaseLayer {
 		setIsTouchEnabled(true);
 	}
 
+	public void unlock() {
+		isLock = false;
+	}
+
 	@Override
 	public boolean ccTouchesBegan(MotionEvent event) {
 		// 开启触摸事件,处理植物选择逻辑
@@ -102,33 +110,62 @@ public class FightLayer extends BaseLayer {
 		}
 		CGRect chooseBox = choose.getBoundingBox();
 		CGRect choseBox = chose.getBoundingBox();
-		if (CGRect.containsPoint(chooseBox, cgPoint)) {
-			//点击到了可选植物方框
-			for (ShowPlant plant : showPlants) {
-				if (CGRect.containsPoint(plant.getShowSprite().getBoundingBox(), cgPoint)) {
-					//点击到了可选植物所在的屏幕区域
-					System.out.println("植物被选中");
-					CCMoveTo moveTo = CCMoveTo.action(0.5f, ccp(75+selectPlants.size()*53,255));
-					CCSequence sequence = CCSequence.actions(moveTo, CCCallFunc.action(this, "unlock"));
-					plant.getShowSprite().runAction(sequence);
-					selectPlants.add(plant);
+
+		// 选择植物
+		if (!isLock) {
+			if (CGRect.containsPoint(chooseBox, cgPoint)
+					&& selectPlants.size() < availablePlantCount) {
+
+				for (ShowPlant plant : showPlants) {
+					if (CGRect.containsPoint(plant.getShowSprite()
+							.getBoundingBox(), cgPoint)) {
+						// 点击到了可选植物所在的屏幕区域
+						System.out.println("植物被选中");
+						isLock = true;
+						CCMoveTo moveTo = CCMoveTo.action(0.25f,
+								ccp(75 + selectPlants.size() * 53, 255));
+						CCSequence sequence = CCSequence.actions(moveTo,
+								CCCallFunc.action(this, "unlock"));
+						plant.getShowSprite().runAction(sequence);
+						selectPlants.add(plant);
+					}
 				}
 			}
-		}
-		if (CGRect.containsPoint(choseBox, cgPoint)) {
-			//点击到了已选植物所在方框,处理反选植物逻辑
-			for (ShowPlant plant :selectPlants) {
-				CGRect selcetPlantBox = plant.getShowSprite().getBoundingBox();
-				if (CGRect.containsPoint(selcetPlantBox, cgPoint)) {
-					System.out.println("反选植物");
-					CCMoveTo moveTo = CCMoveTo.action(0.5f, plant.getBgSprite().getPosition());
-					plant.getShowSprite().runAction(moveTo);
-					selectPlants.remove(plant);					
+
+			if (CGRect.containsPoint(choseBox, cgPoint)) {
+				isDel = false;
+				// 点击到了已选植物所在方框,处理反选植物逻辑
+				for (ShowPlant plant : selectPlants) {
+					selcetPlantBox = plant.getShowSprite().getBoundingBox();
+					if (CGRect.containsPoint(selcetPlantBox, cgPoint)) {
+						System.out.println("反选植物");
+						isLock = true;
+						CCMoveTo moveTo = CCMoveTo.action(0.25f, plant
+								.getBgSprite().getPosition());
+						plant.getShowSprite().runAction(moveTo);
+						selectPlants.remove(plant);
+						isDel = true;
+						continue;
+					}
+					if (isDel) {
+						CCMoveBy moveBy = CCMoveBy.action(0.1f, ccp(-53, 0));
+						plant.getShowSprite().runAction(moveBy);
+					}
 				}
+				unlock();
 			}
+
+		} else if (CGRect.containsPoint(start.getBoundingBox(), cgPoint)) {
+			// 点击了一起摇滚
+			ready();
 		}
 
 		return super.ccTouchesBegan(event);
+	}
+
+	private void ready() {
+		// TODO Auto-generated method stub
+
 	}
 
 	private void showZombies() {
