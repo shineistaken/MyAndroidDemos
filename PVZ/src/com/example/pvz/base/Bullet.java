@@ -1,6 +1,5 @@
 package com.example.pvz.base;
 
-import android.R.integer;
 
 public abstract class Bullet extends Product {
 	protected int attack = 20;
