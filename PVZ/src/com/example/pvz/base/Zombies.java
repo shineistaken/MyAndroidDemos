@@ -5,9 +5,9 @@ import org.cocos2d.types.CGPoint;
 
 public abstract class Zombies extends BaseElement {
 
-	protected int life;
-	protected int attack;
-	protected int speed;
+	protected int life=50;
+	protected int attack=10;
+	protected int speed=20;
 	protected CGPoint startPoint;
 	protected CGPoint endPoint;
 

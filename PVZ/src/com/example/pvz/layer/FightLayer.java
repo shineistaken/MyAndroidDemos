@@ -14,6 +14,7 @@ import org.cocos2d.actions.interval.CCSequence;
 import org.cocos2d.layers.CCTMXTiledMap;
 import org.cocos2d.nodes.CCDirector;
 import org.cocos2d.nodes.CCSprite;
+import org.cocos2d.nodes.CCSpriteFrame;
 import org.cocos2d.types.CGPoint;
 import org.cocos2d.types.CGRect;
 import org.cocos2d.types.CGSize;
@@ -21,6 +22,7 @@ import org.cocos2d.types.CGSize;
 import android.view.MotionEvent;
 
 import com.example.pvz.CommonUtils.CommonUtils;
+import com.example.pvz.bean.PrimaryZombies;
 import com.example.pvz.bean.ShowPlant;
 import com.example.pvz.bean.ShowZombies;
 import com.example.pvz.engine.GameController;
@@ -47,6 +49,7 @@ public class FightLayer extends BaseLayer {
 		showZombies();
 		moveMap();
 	}
+
 	private void loadMap() {
 		tiledMap = CCTMXTiledMap.tiledMap("image/fight/map_day.tmx");
 		tiledMap.setAnchorPoint(0.5f, 0.5f);
@@ -60,7 +63,7 @@ public class FightLayer extends BaseLayer {
 		// 解析地图
 		zombiesPoints = CommonUtils.getMapPoints(tiledMap, "zombies");
 	}
-	
+
 	private void showZombies() {
 		// 展示僵尸
 		for (int i = 0; i < zombiesPoints.size(); i++) {
@@ -71,6 +74,7 @@ public class FightLayer extends BaseLayer {
 		}
 
 	}
+
 	private void moveMap() {
 		// TODO Auto-generated method stub
 		int x = -(int) Math
@@ -203,37 +207,35 @@ public class FightLayer extends BaseLayer {
 
 					+ (CCDirector.sharedDirector().getWinSize().height - plant
 
-					.getShowSprite().getPosition().y)
-					* 0.35f);// 重新计算坐标
+					.getShowSprite().getPosition().y) * 0.35f);// 重新计算坐标
 			this.addChild(plant.getShowSprite());
 		}
 		// 2.移除选择植物的界面
 		choose.removeSelf();
 		// 3.移动地图
-		int x =(int) (tiledMap.getContentSize().width-winSize.width);
+		int x = (int) (tiledMap.getContentSize().width - winSize.width);
 		CCMoveBy moveBy = CCMoveBy.action(1, ccp(x, 0));
-		CCSequence sequence = CCSequence.actions(CCDelayTime.action(1),moveBy, CCCallFunc.action(this, "preGame"));
+		CCSequence sequence = CCSequence.actions(CCDelayTime.action(1), moveBy,
+				CCCallFunc.action(this, "preGame"));
 		tiledMap.runAction(sequence);
 	}
+
 	public void preGame() {
 		ready = CCSprite.sprite("image/fight/startready_01.png");
-		ready.setPosition(winSize.width/2, winSize.height/2);
+		ready.setPosition(winSize.width / 2, winSize.height / 2);
 		this.addChild(ready);
-		String format="image/fight/startready_%02d.png";
+		String format = "image/fight/startready_%02d.png";
 		CCAction animate = CommonUtils.getAnimate(format, 3, false);
-		CCSequence sequence=CCSequence.actions((CCAnimate)animate, CCCallFunc.action(this, "startGame"));
+		CCSequence sequence = CCSequence.actions((CCAnimate) animate,
+				CCCallFunc.action(this, "startGame"));
 		ready.runAction(sequence);
 	}
+
 	public void startGame() {
 		// 开始对战
 		ready.removeSelf();
 		GameController controller = GameController.getInstance();
-		controller.startGame(tiledMap,selectPlants);
+		controller.startGame(tiledMap, selectPlants);
 	}
-
-
-
-
-
 
 }

@@ -12,6 +12,10 @@ import com.example.pvz.base.BaseElement;
 import com.example.pvz.base.Plant;
 import com.example.pvz.base.Zombies;
 
+/**
+ * @author Administrator
+ *
+ */
 public class PrimaryZombies extends Zombies {
 
 	Plant targetPlant;
@@ -43,13 +47,7 @@ public class PrimaryZombies extends Zombies {
 	@Override
 	public void attack(BaseElement elt) {
 		// TODO Auto-generated method stub
-		if (elt instanceof Plant) {
-			Plant plant = (Plant) elt;
-			if (targetPlant == null) {
-				targetPlant = plant;
-			}
-		}
-
+		
 	}
 
 	@Override
