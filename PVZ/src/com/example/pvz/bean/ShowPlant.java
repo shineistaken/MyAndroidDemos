@@ -36,7 +36,7 @@ public class ShowPlant extends BaseLayer {
 	}
 
 	public ShowPlant(int id) {
-	
+		this.id = id;
 		HashMap<String, String> hashMap = db.get(id);
 		String path = hashMap.get("path");
 		showSprite = CCSprite.sprite(path);
@@ -45,6 +45,12 @@ public class ShowPlant extends BaseLayer {
 		bgSprite = CCSprite.sprite(path);
 		bgSprite.setAnchorPoint(0, 0);
 		bgSprite.setOpacity(150);
+	}
+
+	private int id;
+
+	public int getId() {
+		return id;
 	}
 
 }

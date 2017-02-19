@@ -14,7 +14,6 @@ import org.cocos2d.actions.interval.CCSequence;
 import org.cocos2d.layers.CCTMXTiledMap;
 import org.cocos2d.nodes.CCDirector;
 import org.cocos2d.nodes.CCSprite;
-import org.cocos2d.nodes.CCSpriteFrame;
 import org.cocos2d.types.CGPoint;
 import org.cocos2d.types.CGRect;
 import org.cocos2d.types.CGSize;
@@ -22,13 +21,11 @@ import org.cocos2d.types.CGSize;
 import android.view.MotionEvent;
 
 import com.example.pvz.CommonUtils.CommonUtils;
-import com.example.pvz.bean.PrimaryZombies;
 import com.example.pvz.bean.ShowPlant;
 import com.example.pvz.bean.ShowZombies;
 import com.example.pvz.engine.GameController;
 
 public class FightLayer extends BaseLayer {
-	private static final int TAG_CHOSE = 0;
 	private CCTMXTiledMap tiledMap;
 	private List<CGPoint> zombiesPoints;
 	private List<ShowPlant> showPlants;
@@ -39,6 +36,7 @@ public class FightLayer extends BaseLayer {
 	private boolean isLock = false;
 	private CGRect selcetPlantBox;
 	private static final int availablePlantCount = 5;
+	public static final int CHOSE_SPRITE_TAG = 0;
 	private CCSprite startGame;
 	private CCSprite ready;
 
@@ -83,7 +81,10 @@ public class FightLayer extends BaseLayer {
 		CCSequence sequence = CCSequence
 				.actions(CCDelayTime.action(2), moveBy, CCDelayTime.action(2),
 						CCCallFunc.action(this, "loadContainer"));
-		tiledMap.runAction(sequence);
+		//测试使用
+		CCAction sequence2= CCSequence.actions(moveBy,
+				CCCallFunc.action(this, "loadContainer"));
+		tiledMap.runAction(sequence2);
 	}
 
 	public void loadContainer() {
@@ -91,7 +92,7 @@ public class FightLayer extends BaseLayer {
 		chose = CCSprite.sprite("image/fight/chose/fight_chose.png");
 		chose.setAnchorPoint(0, 1);
 		chose.setPosition(0, winSize.height);// 设置位置是屏幕的左上角
-		this.addChild(chose, 0, TAG_CHOSE);
+		this.addChild(chose, 0, CHOSE_SPRITE_TAG);
 
 		choose = CCSprite.sprite("image/fight/chose/fight_choose.png");
 		choose.setAnchorPoint(0, 0);
@@ -135,58 +136,58 @@ public class FightLayer extends BaseLayer {
 		// 游戏开始
 		if (GameController.isStart) {
 			GameController.getInstance().handlePoint(cgPoint);
+			return super.ccTouchesBegan(event);
 		}
 		CGRect chooseBox = choose.getBoundingBox();
 		CGRect choseBox = chose.getBoundingBox();
 		CGRect startGameBox = startGame.getBoundingBox();
+		if (CGRect.containsPoint(chooseBox, cgPoint)) {
+			// 选中了植物容器
+			if (CGRect.containsPoint(startGameBox, cgPoint)) {
+				// 点击了一起摇滚
+				System.out.println("一起来摇滚");
+				if (selectPlants.isEmpty()) {
+					// 选了植物才能开始游戏
+				} else {
+					ready();
+				}
+			} else if (CGRect.containsPoint(chooseBox, cgPoint)
+					&& selectPlants.size() < availablePlantCount && !isLock) {
+				// 选择植物
+				for (ShowPlant plant : showPlants) {
+					CGRect boundingBox = plant.getShowSprite().getBoundingBox();
+					if (CGRect.containsPoint(boundingBox, cgPoint)) {
+						// 点击到了可选植物所在的屏幕区域
+						System.out.println("植物被选中");
+						isLock = true;
+						CCMoveTo moveTo = CCMoveTo.action(0.25f,
+								ccp(75 + selectPlants.size() * 53, 255));
+						CCSequence sequence = CCSequence.actions(moveTo,
+								CCCallFunc.action(this, "unlock"));
+						plant.getShowSprite().runAction(sequence);
+						selectPlants.add(plant);
+					}
+				}
 
-		// 选择植物
-		if (CGRect.containsPoint(chooseBox, cgPoint)
-				&& selectPlants.size() < availablePlantCount && !isLock) {
-
-			for (ShowPlant plant : showPlants) {
-				if (CGRect.containsPoint(
-						plant.getShowSprite().getBoundingBox(), cgPoint)) {
-					// 点击到了可选植物所在的屏幕区域
-					System.out.println("植物被选中");
-					isLock = true;
-					CCMoveTo moveTo = CCMoveTo.action(0.25f,
-							ccp(75 + selectPlants.size() * 53, 255));
-					CCSequence sequence = CCSequence.actions(moveTo,
-							CCCallFunc.action(this, "unlock"));
-					plant.getShowSprite().runAction(sequence);
-					selectPlants.add(plant);
+			} else if (CGRect.containsPoint(choseBox, cgPoint)) {
+				isDel = false;
+				// 点击到了已选植物所在方框,处理反选植物逻辑
+				for (ShowPlant plant : selectPlants) {
+					selcetPlantBox = plant.getShowSprite().getBoundingBox();
+					if (CGRect.containsPoint(selcetPlantBox, cgPoint)) {
+						System.out.println("反选植物");
+						CCMoveTo moveTo = CCMoveTo.action(0.25f, plant
+								.getBgSprite().getPosition());
+						plant.getShowSprite().runAction(moveTo);
+						selectPlants.remove(plant);
+						isDel = true;
+						continue;
+					}
+					if (isDel) {
+						CCMoveBy moveBy = CCMoveBy.action(0.1f, ccp(-53, 0));
+						plant.getShowSprite().runAction(moveBy);
+					}
 				}
-			}
-		} else if (CGRect.containsPoint(choseBox, cgPoint) && !isLock) {
-			isDel = false;
-			// 点击到了已选植物所在方框,处理反选植物逻辑
-			for (ShowPlant plant : selectPlants) {
-				selcetPlantBox = plant.getShowSprite().getBoundingBox();
-				if (CGRect.containsPoint(selcetPlantBox, cgPoint)) {
-					System.out.println("反选植物");
-					isLock = true;
-					CCMoveTo moveTo = CCMoveTo.action(0.25f, plant
-							.getBgSprite().getPosition());
-					plant.getShowSprite().runAction(moveTo);
-					selectPlants.remove(plant);
-					isDel = true;
-					continue;
-				}
-				if (isDel) {
-					CCMoveBy moveBy = CCMoveBy.action(0.1f, ccp(-53, 0));
-					plant.getShowSprite().runAction(moveBy);
-				}
-			}
-			unlock();
-		}
-		if (CGRect.containsPoint(startGameBox, cgPoint)) {
-			// 点击了一起摇滚
-			System.out.println("一起来摇滚");
-			if (selectPlants.isEmpty()) {
-				// 选了植物才能开始游戏
-			} else {
-				ready();
 			}
 		}
 

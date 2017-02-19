@@ -1,6 +1,5 @@
 package com.example.pvz.base;
 
-
 public abstract class Bullet extends Product {
 	protected int attack = 20;
 	protected int speed = 100;
@@ -8,6 +7,12 @@ public abstract class Bullet extends Product {
 	public Bullet(String filepath) {
 		super(filepath);
 		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void baseAction() {
+		// TODO Auto-generated method stub
+
 	}
 
 	public abstract void move();

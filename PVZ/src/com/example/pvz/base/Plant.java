@@ -1,7 +1,6 @@
 package com.example.pvz.base;
 
-
-public abstract class  Plant extends BaseElement {
+public abstract class Plant extends BaseElement {
 
 	protected int life;// 生命值
 	protected int line; // 行号
@@ -21,7 +20,8 @@ public abstract class  Plant extends BaseElement {
 	 *            攻击力值
 	 */
 	public void attacked(int attack) {
-		life = attack;
+
+		life -= attack;
 		if (life <= 0) {
 			destroy();
 		}
@@ -50,6 +50,5 @@ public abstract class  Plant extends BaseElement {
 	public void setRow(int row) {
 		this.row = row;
 	}
-	
 
 }
