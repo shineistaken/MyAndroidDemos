@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.cocos2d.actions.CCScheduler;
 import org.cocos2d.actions.base.CCAction;
 import org.cocos2d.actions.instant.CCCallFunc;
 import org.cocos2d.actions.interval.CCMoveBy;
@@ -60,7 +61,8 @@ public class GameController {
 		// 1.加载地图
 		loadMap();
 		// 2.添加僵尸
-		addZombies();
+		// addZombies();
+		CCScheduler.sharedScheduler().schedule("addZombies", this, 2, false);
 		// 3.安放植物
 		// 4.植物攻击僵尸
 		// 5.僵尸攻击植物
@@ -74,7 +76,7 @@ public class GameController {
 		System.out.println("加载地图");
 	}
 
-	public void addZombies() {
+	public void addZombies(float t) {
 		// TODO Auto-generated method stub
 		Random random = new Random();
 		int lineNum = random.nextInt(5);
@@ -89,7 +91,7 @@ public class GameController {
 
 		PrimaryZombies primaryZombies = new PrimaryZombies(
 				roadPoints.get(lineNum * 2), roadPoints.get(lineNum * 2 + 1));
-		System.out.println("行号："+lineNum);
+		System.out.println("行号：" + lineNum);
 		map.addChild(primaryZombies);
 	}
 
